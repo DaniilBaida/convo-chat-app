@@ -89,8 +89,7 @@ export const register = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
     try {
-        res.cookie("jwt", "", {
-            maxAge: 0,
+        res.clearCookie("jwt", {
             httpOnly: true,
             sameSite: "strict",
             secure: process.env.NODE_ENV !== "development",
