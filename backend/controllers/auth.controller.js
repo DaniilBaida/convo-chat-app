@@ -1,15 +1,19 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
-import { JWT_EXPIRES_IN, JWT_SECRET } from "../config/env.js";
+import generateToken from "../utils/generateToken.js";
 
 export const login = async (req, res, next) => {
+    const { email, password } = req.body;
     try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Email and password fields are required",
+            });
+        }
 
+        const user = await User.findOne({ email }).select("+password");
         if (!user) {
-            await bcrypt.compare(password, "qafwdejkbglhva217>!>!>!>!");
             const error = new Error("Email/password combination is invalid");
             error.status = 401;
             throw error;
@@ -21,29 +25,39 @@ export const login = async (req, res, next) => {
             error.status = 401;
             throw error;
         }
-        user.password = undefined;
 
-        const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
-            expiresIn: JWT_EXPIRES_IN,
-        });
+        generateToken(user._id, res);
+
+        user.password = undefined;
 
         res.status(200).json({
             success: true,
             message: "User logged in successfully",
-            data: {
-                token,
-                user,
-            },
+            data: user,
         });
     } catch (error) {
         next(error);
     }
 };
-export const register = async (req, res, next) => {
-    try {
-        const { name, email, password } = req.body;
-        const existingUser = await User.findOne({ email });
 
+export const register = async (req, res, next) => {
+    const { name, email, password } = req.body;
+    try {
+        if (!name || !email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 6 characters",
+            });
+        }
+
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
             const error = new Error("User already exists!");
             error.status = 400;
@@ -57,25 +71,33 @@ export const register = async (req, res, next) => {
             email,
             password: hashedPassword,
         });
-        newUser.password = undefined;
 
-        const token = jwt.sign({ UserId: newUser._id }, JWT_SECRET, {
-            expiresIn: JWT_EXPIRES_IN,
-        });
+        generateToken(newUser._id, res);
+
+        newUser.password = undefined;
 
         res.status(201).json({
             success: true,
             message: "User created successfully",
-            data: { token, user: newUser },
+            data: { user: newUser },
         });
     } catch (error) {
         next(error);
     }
 };
+
 export const logout = async (req, res, next) => {
     try {
-        //SIGN IN LOGIC
-        console.log("Sign OUT");
+        res.cookie("jwt", "", {
+            maxAge: 0,
+            httpOnly: true,
+            sameSite: "strict",
+            secure: process.env.NODE_ENV !== "development",
+        });
+        res.status(200).json({
+            success: true,
+            message: "Logged out successfully",
+        });
     } catch (error) {
         next(error);
     }
