@@ -6,22 +6,21 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body;
     try {
         if (!email || !password) {
-            return res.status(400).json({
-                success: false,
-                message: "Email and password fields are required",
-            });
+            const error = new Error("Email and password fields are required");
+            error.status = 400;
+            throw error;
         }
 
         const user = await User.findOne({ email }).select("+password");
         if (!user) {
-            const error = new Error("Email/password combination is invalid");
+            const error = new Error("Invalid email or password");
             error.status = 401;
             throw error;
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            const error = new Error("Email/password combination is invalid");
+            const error = new Error("Invalid email or password");
             error.status = 401;
             throw error;
         }
@@ -44,22 +43,20 @@ export const register = async (req, res, next) => {
     const { name, email, password, avatarUrl } = req.body;
     try {
         if (!name || !email || !password || !avatarUrl) {
-            return res.status(400).json({
-                success: false,
-                message: "All fields are required",
-            });
+            const error = new Error("All fields are required");
+            error.status = 400;
+            throw error;
         }
 
         if (password.length < 6) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 6 characters",
-            });
+            const error = new Error("Password must be at least 6 characters");
+            error.status = 400;
+            throw error;
         }
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            const error = new Error("User already exists!");
+            const error = new Error("User already exists");
             error.status = 400;
             throw error;
         }
@@ -79,7 +76,7 @@ export const register = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
-            message: "User created successfully",
+            message: "User registered successfully",
             data: { user: newUser },
         });
     } catch (error) {
@@ -96,7 +93,7 @@ export const logout = async (req, res, next) => {
         });
         res.status(200).json({
             success: true,
-            message: "Logged out successfully",
+            message: "User logged out successfully",
         });
     } catch (error) {
         next(error);

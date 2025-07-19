@@ -4,19 +4,18 @@ import User from "../models/user.model.js";
 export const updateAvatar = async (req, res, next) => {
     const { avatarUrl } = req.body;
     const { user } = req;
+
     try {
         if (!avatarUrl) {
-            return res.status(400).json({
-                success: false,
-                message: "Avatar URL is required",
-            });
+            const error = new Error("Avatar URL is required");
+            error.status = 400;
+            throw error;
         }
 
         if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: "Unauthorized - user not found",
-            });
+            const error = new Error("Authentication required");
+            error.status = 401;
+            throw error;
         }
 
         const uploadResult = await cloudinary.uploader.upload(avatarUrl)
@@ -24,11 +23,15 @@ export const updateAvatar = async (req, res, next) => {
 
         const updatedUser = await User.findByIdAndUpdate(
             user._id,
-            {
-                avatarUrl: uploadResult,
-            },
+            { avatarUrl: uploadResult },
             { new: true }
         );
+
+        if (!updatedUser) {
+            const error = new Error("User not found");
+            error.status = 404;
+            throw error;
+        }
 
         updatedUser.password = undefined;
 

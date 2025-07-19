@@ -7,25 +7,18 @@ export const authorize = async (req, res, next) => {
         const token = req.cookies.jwt;
 
         if (!token) {
-            return res.status(401).json({
-                success: false,
-                message: "Unauthorized - No Token Provided",
-            });
+            const error = new Error("Authentication required");
+            error.status = 401;
+            throw error;
         }
 
         const decoded = jwt.verify(token, JWT_SECRET);
-        if (!decoded) {
-            return res.status(401).json({
-                success: false,
-                message: "Unauthorized - Invalid Token",
-            });
-        }
 
         const user = await User.findById(decoded.userId).select("-password");
 
         if (!user) {
-            const error = new Error("User not found");
-            error.status = 404;
+            const error = new Error("Authentication required");
+            error.status = 401;
             throw error;
         }
 
