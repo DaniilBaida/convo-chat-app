@@ -102,3 +102,13 @@ export const logout = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getAuthenticatedUser = (req, res) => {
+    const { _id, name, email, avatarUrl } = req.user;
+
+    res.status(200).json({
+        success: true,
+        message: "Authenticated user retrieved",
+        data: { _id, name, email, avatarUrl },
+    });
+};

@@ -4,6 +4,7 @@ import connectToDatabase from "./database/db.js";
 import cookieParser from "cookie-parser";
 import { PORT } from "./config/env.js";
 import authRouter from "./routes/auth.routes.js";
+import userRouter from "./routes/user.routes.js";
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/user", userRouter);
 
 app.use(errorMiddleware);
 
