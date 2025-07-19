@@ -14,14 +14,14 @@ app.get("/", (req, res) => {
     res.send("Welcome to Convo API");
 });
 
-app.get("/api/v1/auth", authRouter);
+app.use("/api/v1/auth", authRouter);
 
 app.use(errorMiddleware);
 
 try {
     await connectToDatabase();
 
-    app.listen(PORT, () => {
+    app.listen(PORT || 5500, () => {
         console.log(`Convo API is running on http://localhost:${PORT}`);
     });
 } catch (error) {

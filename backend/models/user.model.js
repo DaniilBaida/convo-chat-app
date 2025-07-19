@@ -21,7 +21,11 @@ const userSchema = mongoose.Schema(
             type: String,
             required: true,
             minLength: 6,
-            select: false,
+        },
+        avatarUrl: {
+            type: String,
+            default: "",
+            trim: true,
         },
     },
     { timestamps: true }
