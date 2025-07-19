@@ -41,9 +41,9 @@ export const login = async (req, res, next) => {
 };
 
 export const register = async (req, res, next) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, avatarUrl } = req.body;
     try {
-        if (!name || !email || !password) {
+        if (!name || !email || !password || !avatarUrl) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required",
@@ -70,6 +70,7 @@ export const register = async (req, res, next) => {
             name,
             email,
             password: hashedPassword,
+            avatarUrl,
         });
 
         generateToken(newUser._id, res);
