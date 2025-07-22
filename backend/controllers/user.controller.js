@@ -1,5 +1,6 @@
 import cloudinary from "../config/cloudinary.js";
 import User from "../models/user.model.js";
+import createError from "../utils/createError.js";
 
 export const updateAvatar = async (req, res, next) => {
     const { avatarUrl } = req.body;
@@ -7,15 +8,11 @@ export const updateAvatar = async (req, res, next) => {
 
     try {
         if (!avatarUrl) {
-            const error = new Error("Avatar URL is required");
-            error.status = 400;
-            throw error;
+            throw createError("Avatar URL is required", 400);
         }
 
         if (!user) {
-            const error = new Error("Authentication required");
-            error.status = 401;
-            throw error;
+            throw createError("Authentication required", 401);
         }
 
         const uploadResult = await cloudinary.uploader.upload(avatarUrl)
@@ -28,9 +25,7 @@ export const updateAvatar = async (req, res, next) => {
         );
 
         if (!updatedUser) {
-            const error = new Error("User not found");
-            error.status = 404;
-            throw error;
+            throw createError("User not found", 404);
         }
 
         updatedUser.password = undefined;

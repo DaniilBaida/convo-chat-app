@@ -1,28 +1,23 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import generateToken from "../utils/generateToken.js";
+import createError from "../utils/createError.js";
 
 export const login = async (req, res, next) => {
     const { email, password } = req.body;
     try {
         if (!email || !password) {
-            const error = new Error("Email and password fields are required");
-            error.status = 400;
-            throw error;
+            throw createError("Email and password fields are required", 400);
         }
 
         const user = await User.findOne({ email }).select("+password");
         if (!user) {
-            const error = new Error("Invalid email or password");
-            error.status = 401;
-            throw error;
+            throw createError("Invalid email or password", 401);
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            const error = new Error("Invalid email or password");
-            error.status = 401;
-            throw error;
+            throw createError("Invalid email or password", 401);
         }
 
         generateToken(user._id, res);
@@ -43,22 +38,16 @@ export const register = async (req, res, next) => {
     const { name, email, password, avatarUrl } = req.body;
     try {
         if (!name || !email || !password || !avatarUrl) {
-            const error = new Error("All fields are required");
-            error.status = 400;
-            throw error;
+            throw createError("All fields are required", 400);
         }
 
         if (password.length < 6) {
-            const error = new Error("Password must be at least 6 characters");
-            error.status = 400;
-            throw error;
+            throw createError("Password must be at least 6 characters", 400);
         }
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            const error = new Error("User already exists");
-            error.status = 400;
-            throw error;
+            throw createError("User already exists", 400);
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
