@@ -2,14 +2,22 @@ import express from "express";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import connectToDatabase from "./database/db.js";
 import cookieParser from "cookie-parser";
-import { PORT } from "./config/env.js";
+import { PORT, FRONTEND_URL } from "./config/env.js";
 import authRouter from "./routes/auth.routes.js";
 import userRouter from "./routes/user.routes.js";
+import cors from "cors";
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(
+    cors({
+        origin: FRONTEND_URL,
+        credentials: true,
+    })
+);
 
 app.get("/", (req, res) => {
     res.send("Welcome to Convo API");
