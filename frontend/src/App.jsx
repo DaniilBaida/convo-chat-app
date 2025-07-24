@@ -36,8 +36,18 @@ function App() {
                             authUser ? <HomePage /> : <Navigate to="/login" />
                         }
                     />
-                    <Route path="/register" element={<RegisterPage />} />
-                    <Route path="/login" element={<LoginPage />} />
+                    <Route
+                        path="/register"
+                        element={
+                            !authUser ? <RegisterPage /> : <Navigate to="/" />
+                        }
+                    />
+                    <Route
+                        path="/login"
+                        element={
+                            !authUser ? <LoginPage /> : <Navigate to="/" />
+                        }
+                    />
                     <Route
                         path="/settings"
                         element={
